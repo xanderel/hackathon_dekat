@@ -80,7 +80,8 @@ def upload_board(board):
 def display_board(board):
     #display(SVG(chess.svg.board(board=board)))
     boardsvg = (chess.svg.board(board))
-    with open('web/src/assets/temp.svg', 'w') as outputfile:
+    #with open('web/src/assets/temp.svg', 'w') as outputfile:
+    with open('temp.svg', 'w') as outputfile:
         outputfile.write(boardsvg)
     time.sleep(0.1)
     os.startfile('temp.svg')
@@ -118,25 +119,25 @@ def get_move(board, input_type, versus_type):
             # It is black's turn, so get a move suggestion from Stockfish
             move = get_stockfish_move(board)
             return move
-    else:
-        # Get all legal moves on the board
-        legal_moves = board.legal_moves
 
-        if(input_type == "Voice"):
-            #voice_condition = 0 # track whether it failed or was successful (or break out of loop)
-            while(True):
-                v_move = record()
-                if(v_move.__contains__(" ")):
-                    v_move = v_move.replace(" ", "")
-                v_move = v_move.strip()
-                v_move = v_move.lower()
-                v_move = handle_promotion(board, v_move)
-                if(chess.Move.from_uci(v_move) in legal_moves):
-                    print("Allowed move. Your move was: ", v_move)
-                    v_move = chess.Move.from_uci(v_move)
-                    return v_move
-                else:
-                    print("Disallowed move. Try again. Your move was: ", v_move)  
+    # Get all legal moves on the board
+    legal_moves = board.legal_moves
+
+    if(input_type == "Voice"):
+        #voice_condition = 0 # track whether it failed or was successful (or break out of loop)
+        while(True):
+            v_move = record()
+            if(v_move.__contains__(" ")):
+                v_move = v_move.replace(" ", "")
+            v_move = v_move.strip()
+            v_move = v_move.lower()
+            v_move = handle_promotion(board, v_move)
+            if(chess.Move.from_uci(v_move) in legal_moves):
+                print("Allowed move. Your move was: ", v_move)
+                v_move = chess.Move.from_uci(v_move)
+                return v_move
+            else:
+                print("Disallowed move. Try again. Your move was: ", v_move)  
 
 # Define a function to update the elapsed time for a player
 def update_time(player, elapsed_time, white_time, black_time):
@@ -153,13 +154,16 @@ def initialize_game():
     # you should import settings from the website
     #settings = website.settings()
     input_type = "Voice"
-    versus_type = "CPU"
+    versus_type = "Human"
     return board, input_type, versus_type 
 
 """ Code for ending the match """
-def finish_game():
+def finish_game(board):
     # Check the result of the game
     result = board.result()
+
+    display_board(board)
+    #upload_board(board)
 
     # Return a string based on the result
     if(result == "1-0"):
@@ -221,4 +225,6 @@ if __name__ == "__main__":
         print(f"White: {white_time // 60}:{white_time % 60:02d}")
         print(f"Black: {black_time // 60}:{black_time % 60:02d}")
 
-        final_message = finish_game()
+    # Get the final standing of the game
+    final_message = finish_game(board)
+    print("\n" + final_message)
