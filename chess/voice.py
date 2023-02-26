@@ -2,6 +2,7 @@ import speech_recognition as sr
 import string
 import keyboard
 def record():
+    print("Press space to speak a move.")
     keyboard.wait('space')
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -17,7 +18,7 @@ def record():
             text2 = text[2:4]
             text = text1+text2   
         if((text[0].isalpha() and text[3].isalpha()) and (text[1].isdigit() and text[4].isdigit())):
-            print("You said: ", text)
+            print("You said: ", text, type(text))
             return text
         else:
             record()
