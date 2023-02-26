@@ -1,9 +1,8 @@
 import speech_recognition as sr
 import string
 
-r = sr.Recognizer()
-
 def record():
+    r = sr.Recognizer()
     with sr.Microphone() as source:
         r.adjust_for_ambient_noise(source)
         print("Speak something!")
@@ -27,5 +26,3 @@ def record():
     except sr.RequestError as e:
         print("Sorry, an error occurred while trying to recognize your speech. Error: ", e)
         record()
-
-record()
