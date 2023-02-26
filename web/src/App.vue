@@ -50,23 +50,86 @@
       <p class="max-w-2x1 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400 text-center mb-12">
         Choose how you would like to play:
       </p>
+      
+      <div class="mx-32 columns-2 mt-2 gap-10">
+        <div>
+          <p class="max-w-2x1 font-light text-gray-500 md:text-lg lg:text-xl dark:text-gray-400 text-center mb-3">
+            Player Count
+          </p>
+          
+<div class="mb-5 flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
+    <input @select="setPlayers(2)" checked id="player-radio-1" type="radio" value="" name="players-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <label for="player-radio-1" class="w-full py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Two Players</label>
+</div>
+<div class="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
+    <input @select="setPlayers(1)" id="player-radio-2" type="radio" value="" name="players-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <label for="player-radio-2" class="w-full py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">One Player with AI</label>
+</div>
+
+        </div>
+        <div>
+
+          <p class="max-w-2x1 font-light text-gray-500 md:text-lg lg:text-xl dark:text-gray-400 text-center mb-3">
+            Input type
+          </p>
+
+          <div class="mb-5 flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
+    <input @click="setInput(1)" checked id="input-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <label for="input-radio-1" class="w-full py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Keyboard Controls</label>
+</div>
+<div class="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
+    <input @click="setInput(2)" id="input-radio-2" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <label for="input-radio-2" class="w-full py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Voice Controls</label>
+</div>
+
+
+        </div>
+      </div>
+      <div class="flex mt-5">
+        <button @click="startGame()" type="button" class="mx-auto text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Start Game</button>
+      </div>
+
 
       
 
     </section>
+
+
 
     <section v-if="page === 'start'">
-      
+
+      <h1 class="max-w-2xl mb-4 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl dark:text-white text-center my-8 mx-auto">
+        {{ curPlayer }} to move
+      </h1>
+      <img id="boardImg" @click="swapPlayers()" class="max-w-lg mx-auto mt-4" src="./assets/temp.svg" alt="">
+
+ <div class="mt-4 max-w-md mx-auto">
+      <div v-if="inputType.valueOf() === 1" class="mb-6">
+    <label for="from-input" class="text-center block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter a Piece Coordinate</label>
+    <input v-model="fromInput" type="text" id="from-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+
+<div v-if="inputType.valueOf() === 1" class="mb-6">
+    <label for="to-input" class="text-center block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter a Coordinate to Move it to</label>
+    <input v-model="toInput" type="text" id="to-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+</div>
+
+<div v-if="inputType.valueOf() === 1" class="flex mt-5">
+        <button @click="sendMove(fromInput, toInput)" type="button" class="mx-auto text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Send Move</button>
+      </div>
+  </div>
     </section>
+
+
+
     <section v-if="page === 'about'">
       <h1 class="max-w-2xl mb-4 text-4xl font-extrabold leading-none tracking-tight md:text-5xl xl:text-6xl dark:text-white text-center my-8 mx-auto">
         About Us
       </h1>
       <p class="max-w-2x1 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400 text-center mb-12">
-        Learn more about the people behind HackWesTX
+        Learn more about the people behind ChessWesTX
       </p>
     </section>
-
   </div>
   
 </template>
@@ -75,9 +138,41 @@
   import { ref } from 'vue';
 
   const page = ref("home");
+  const players = ref(2);
+  const inputType = ref(1);
+  const toInput = "";
+  const fromInput = "";
+  const curPlayer = ref("White");
+
+  // For swapping between each page view
   const viewSwap = (view: string) => {
+    if(view === "play"){
+      setPlayers(2);
+      setInput(1);
+    }
     page.value = view;
   }
-  // For swapping between each page view
-  
+  const setPlayers = (num: number) => {
+    players.value = num;
+  }  
+  const setInput = (type: number) => {
+    inputType.value = type;
+  }
+  const startGame = () => {
+
+    curPlayer.value = 'White';
+    page.value = 'start';
+  }
+
+  const swapPlayers = () => {
+    if(curPlayer.value === "White"){
+      curPlayer.value = "Black";
+    } else {
+      curPlayer.value = "White"
+    }
+  }
+  const sendMove = (from: string, to: string) => {
+    const totalMove = from + to;
+    console.log(totalMove);
+  }
 </script>
