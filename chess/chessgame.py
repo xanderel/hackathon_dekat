@@ -80,7 +80,8 @@ def upload_board(board):
 def display_board(board):
     #display(SVG(chess.svg.board(board=board)))
     boardsvg = (chess.svg.board(board))
-    with open('web/src/assets/temp.svg', 'w') as outputfile:
+    #with open('web/src/assets/temp.svg', 'w') as outputfile:
+    with open('temp.svg', 'w') as outputfile:
         outputfile.write(boardsvg)
     time.sleep(0.1)
     os.startfile('temp.svg')
@@ -113,10 +114,11 @@ def handle_promotion(board, move):
 
 """ Get the move from the player """
 def get_move(board, input_type, versus_type):
-    # if board.turn == chess.BLACK:
-    #     # It is black's turn, so get a move suggestion from Stockfish
-    #     move = get_stockfish_move(board)
-    #     return move
+    if(versus_type == "CPU"):
+        if board.turn == chess.BLACK:
+            # It is black's turn, so get a move suggestion from Stockfish
+            move = get_stockfish_move(board)
+            return move
 
     # Get all legal moves on the board
     legal_moves = board.legal_moves
@@ -152,13 +154,16 @@ def initialize_game():
     # you should import settings from the website
     #settings = website.settings()
     input_type = "Voice"
-    versus_type = "CPU"
+    versus_type = "Human"
     return board, input_type, versus_type 
 
 """ Code for ending the match """
-def finish_game():
+def finish_game(board):
     # Check the result of the game
     result = board.result()
+
+    display_board(board)
+    #upload_board(board)
 
     # Return a string based on the result
     if(result == "1-0"):
@@ -220,4 +225,6 @@ if __name__ == "__main__":
         print(f"White: {white_time // 60}:{white_time % 60:02d}")
         print(f"Black: {black_time // 60}:{black_time % 60:02d}")
 
-        final_message = finish_game()
+    # Get the final standing of the game
+    final_message = finish_game(board)
+    print("\n" + final_message)
