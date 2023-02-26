@@ -44,7 +44,6 @@ def upload_board(board):
     #save the SVG image to a file
     with open("chessboard.svg", "w") as f:
         f.write(svg)
-    print(type(board))
 
     # create a 2-D array representing the chess board
     board_array = [[' ' for _ in range(8)] for _ in range(8)]
@@ -93,8 +92,6 @@ def get_move(board, input_type, versus_type):
         #voice_condition = 0 # track whether it failed or was successful (or break out of loop)
         while(True):
             v_move = record()
-            print("debug: ", v_move, type(v_move))
-            #v_move = v_move.strip().replace(" ", "").lower()
             if(v_move.__contains__(" ")):
                 v_move = v_move.replace(" ", "")
             v_move = v_move.strip()
