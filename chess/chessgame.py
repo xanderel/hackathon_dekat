@@ -88,7 +88,7 @@ def display_board(board):
 """ Get stockfish's move (black only) """
 def get_stockfish_move(board):
     # Initialize the Stockfish engine
-    engine = chess.engine.SimpleEngine.popen_uci("/path/to/stockfish")
+    engine = chess.engine.SimpleEngine.popen_uci("C:\hackathon_dekat\stockfish_15.1_win_x64_avx2")
 
     # Set the position to the current board state
     info = engine.analyse(board, chess.engine.Limit(time=2.0))
