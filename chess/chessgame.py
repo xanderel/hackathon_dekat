@@ -101,13 +101,22 @@ def get_stockfish_move(board):
 
     return best_move
 
+""" The engine cannot natively handle promotions with 4-char UCI commands. This handles that. """
+def handle_promotion(board, move):
+    if(move[1] == '2' and move[3] == '1'):
+        if(chess.Move.from_uci(str(move + 'q')) in board.legal_moves):
+            return (move + 'q')
+    elif(move[1] == '7' and move[3] == '8'):
+        if(chess.Move.from_uci(str(move + 'q')) in board.legal_moves):
+            return (move + 'q')
+    return move
 
 """ Get the move from the player """
 def get_move(board, input_type, versus_type):
-    if board.turn == chess.BLACK:
-        # It is black's turn, so get a move suggestion from Stockfish
-        move = get_stockfish_move(board)
-        return move
+    # if board.turn == chess.BLACK:
+    #     # It is black's turn, so get a move suggestion from Stockfish
+    #     move = get_stockfish_move(board)
+    #     return move
 
     # Get all legal moves on the board
     legal_moves = board.legal_moves
@@ -120,6 +129,7 @@ def get_move(board, input_type, versus_type):
                 v_move = v_move.replace(" ", "")
             v_move = v_move.strip()
             v_move = v_move.lower()
+            v_move = handle_promotion(board, v_move)
             if(chess.Move.from_uci(v_move) in legal_moves):
                 print("Allowed move. Your move was: ", v_move)
                 v_move = chess.Move.from_uci(v_move)
@@ -176,6 +186,12 @@ if __name__ == "__main__":
     
 
     while not board.is_game_over():
+        # Display the board
+        display_board(board)
+
+        # Upload the board to embedded/web connections
+        #upload_board(board)
+
         # Determine the current player
         current_player = board.turn
 
@@ -204,6 +220,4 @@ if __name__ == "__main__":
         print(f"White: {white_time // 60}:{white_time % 60:02d}")
         print(f"Black: {black_time // 60}:{black_time % 60:02d}")
 
-        display_board(board)
-        #upload_board(board)
         final_message = finish_game()
