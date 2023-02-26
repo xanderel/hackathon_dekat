@@ -43,7 +43,7 @@ def upload_board(board):
 
     svg = chess.svg.board(board=board)
     #save the SVG image to a file
-    with open("chessboard.svg", "w") as f:
+    with open("web/src/assets/chessboard.svg", "w") as f:
         f.write(svg)
 
     # create a 2-D array representing the chess board
@@ -80,7 +80,7 @@ def upload_board(board):
 def display_board(board):
     #display(SVG(chess.svg.board(board=board)))
     boardsvg = (chess.svg.board(board))
-    with open('temp.svg', 'w') as outputfile:
+    with open('web/src/assets/temp.svg', 'w') as outputfile:
         outputfile.write(boardsvg)
     time.sleep(0.1)
     os.startfile('temp.svg')
