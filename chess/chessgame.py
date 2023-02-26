@@ -1,5 +1,6 @@
 import chess
 import chess.pgn
+import chess.engine
 import serial
 from IPython.display import SVG, display
 import os, time, keyboard
@@ -28,7 +29,7 @@ def record():
                 print("processing")
                 text1 = text[0:2] + " "
                 text2 = text[2:4]
-                text = text1+text2   
+                text = text1+text2
             if((text[0].isalpha() and text[3].isalpha()) and (text[1].isdigit() and text[4].isdigit())):
                 print("You said: ", text)
                 return text
@@ -84,10 +85,33 @@ def display_board(board):
     time.sleep(0.1)
     os.startfile('temp.svg')
 
+""" Get stockfish's move (black only) """
+def get_stockfish_move(board):
+    # Initialize the Stockfish engine
+    engine = chess.engine.SimpleEngine.popen_uci("/path/to/stockfish")
+
+    # Set the position to the current board state
+    info = engine.analyse(board, chess.engine.Limit(time=2.0))
+
+    # Get the best move suggested by Stockfish
+    best_move = info.get("pv")[0]
+
+    # Stop the engine
+    engine.quit()
+
+    return best_move
+
 
 """ Get the move from the player """
 def get_move(board, input_type, versus_type):
+    if board.turn == chess.BLACK:
+        # It is black's turn, so get a move suggestion from Stockfish
+        move = get_stockfish_move(board)
+        return move
+
+    # Get all legal moves on the board
     legal_moves = board.legal_moves
+
     if(input_type == "Voice"):
         #voice_condition = 0 # track whether it failed or was successful (or break out of loop)
         while(True):
@@ -166,4 +190,4 @@ if __name__ == "__main__":
             print(f"Black: {black_time // 60}:{black_time % 60:02d}")
 
             display_board(board)
-            upload_board(board)
+            #upload_board(board)
