@@ -2,39 +2,40 @@ import chess
 import chess.pgn
 import serial
 from IPython.display import SVG, display
-#import voice
 import os, time, keyboard
 
 import speech_recognition as sr
 import string
 
+import speech_recognition as sr
+import string
+import keyboard
+
+""" Record audio for voice commands """
 def record():
-    print("Press space to speak a move.")
-    keyboard.wait('space')
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source)
-        print("Speak something!")
-        audio = r.listen(source,timeout = 5, phrase_time_limit=5)
-    try:
-        text = r.recognize_google(audio)
-        text.lower()
-        if(text[2] != " "):
-            print("processing")
-            text1 = text[0:2] + " "
-            text2 = text[2:4]
-            text = text1+text2   
-        if((text[0].isalpha() and text[3].isalpha()) and (text[1].isdigit() and text[4].isdigit())):
-            print("You said: ", text, type(text))
-            return text
-        else:
-            record()
-    except sr.UnknownValueError:
-        print("Sorry, I could not understand what you said.")
-        record()
-    except sr.RequestError as e:
-        print("Sorry, an error occurred while trying to recognize your speech. Error: ", e)
-        record()
+    while True:
+        print("Press space to speak a move.")
+        keyboard.wait('space')
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source)
+            print("Speak something!")
+            audio = r.listen(source,timeout = 5, phrase_time_limit=5)
+        try:
+            text = r.recognize_google(audio)
+            text.lower()
+            if(text[2] != " "):
+                print("processing")
+                text1 = text[0:2] + " "
+                text2 = text[2:4]
+                text = text1+text2   
+            if((text[0].isalpha() and text[3].isalpha()) and (text[1].isdigit() and text[4].isdigit())):
+                print("You said: ", text)
+                return text
+        except sr.UnknownValueError:
+            print("Sorry, I could not understand what you said.")
+        except sr.RequestError as e:
+            print("Sorry, an error occurred while trying to recognize your speech. Error: ", e)
 
 """ Upload the board object to the website (SVG) and microcontroller () """
 def upload_board(board):
@@ -67,6 +68,8 @@ def upload_board(board):
         for value in row:
             string += str(value) + ","
     string = string[:-1] + "\n"
+
+    print(string)
 
     # send the string to the Arduino via serial communication
     ser = serial.Serial('COM3', 9600) # replace 'COM3' with the serial port of your Arduino
@@ -101,8 +104,15 @@ def get_move(board, input_type, versus_type):
                 v_move = chess.Move.from_uci(v_move)
                 return v_move
             else:
-                print("Disallowed move. Try again. Your move was: ", v_move)
-    
+                print("Disallowed move. Try again. Your move was: ", v_move)  
+
+# Define a function to update the elapsed time for a player
+def update_time(player, elapsed_time, white_time, black_time):
+    if player == chess.WHITE:
+        white_time -= elapsed_time
+    else:
+        black_time -= elapsed_time
+    return white_time, black_time
 
 
 """ Initialize the board from settings and begin the game """
@@ -121,10 +131,42 @@ def finish_game():
 if __name__ == "__main__":
     while True:
         board, input_type, versus_type = initialize_game()
+        # Set the initial time for both players
+        white_time = 15 * 60  # 5 minutes
+        black_time = 15 * 60  # 5 minutes
+        # Set the time increment for both players
+        time_increment = 10  # 5 seconds
+
+        
 
         while not board.is_game_over():
+            # Determine the current player
+            current_player = board.turn
+
+            # Get the current time
+            start_time = time.time()
+
+            # Get the move from the player
             move = get_move(board, input_type, versus_type)
+
+            # Determine the elapsed time for the move
+            elapsed_time = int(time.time() - start_time)
+
+            # Update the elapsed time for the current player
+            white_time, black_time = update_time(current_player, elapsed_time, white_time, black_time)
+ 
+            # Add the time increment to the current player's time
+            if current_player == chess.WHITE:
+                white_time += time_increment
+            else:
+                black_time += time_increment
+
+            # Push the move to the board
             board.push(move)
+
+            # Print the current time for both players
+            print(f"White: {white_time // 60}:{white_time % 60:02d}")
+            print(f"Black: {black_time // 60}:{black_time % 60:02d}")
+
             display_board(board)
-        #upload_board(board)
-    
+            upload_board(board)
