@@ -7,10 +7,29 @@ import os, time, keyboard
 
 import speech_recognition as sr
 import string
-
-import speech_recognition as sr
-import string
 import keyboard
+
+ser = serial.Serial('COM7', 9600) # replace 'COM3' with the appropriate serial port and baud rate
+
+""" Sends LED data to the Arduino in the form of rows and columns """
+def set_led(row, col, state):
+    command = f's {row} {col} {int(state)}\n'
+    ser.write(command.encode())
+
+"""" Cleans up strings and converts string into 2D array of 8x8 """
+def display(board):
+    time.sleep(2)
+    board = board.replace(",", "")
+    edit_board = []
+    for i in range(8):
+        edit_board.append(board[i*8:(i+1)*8])
+    # turn on the first row
+    for col in range(8):
+        for row in range(8):
+            if(edit_board[col][row]!= " "):
+                set_led(row, col, True)
+            else:
+                set_led(row, col, False)
 
 """ Record audio for voice commands """
 def record():
@@ -29,8 +48,8 @@ def record():
                 print("processing")
                 text1 = text[0:2] + " "
                 text2 = text[2:4]
-                text = text1+text2
-            if((text[0].isalpha() and text[3].isalpha()) and (text[1].isdigit() and text[4].isdigit())):
+                text = text1+text2   
+            if(len(text)> 4 and (text[0].isalpha() and text[3].isalpha()) and (text[1].isdigit() and text[4].isdigit())):
                 print("You said: ", text)
                 return text
         except sr.UnknownValueError:
@@ -38,7 +57,7 @@ def record():
         except sr.RequestError as e:
             print("Sorry, an error occurred while trying to recognize your speech. Error: ", e)
 
-""" Upload the board object to the website (SVG) and microcontroller () """
+""" Upload the board object to the website (SVG) and microcontroller (8x8 array) """
 def upload_board(board):
 
     svg = chess.svg.board(board=board)
@@ -57,10 +76,6 @@ def upload_board(board):
             rank_number = chess.square_rank(square)
             piece_name = piece.symbol()
             board_array[rank_number][file_number] = piece_name
-
-    # print the resulting 2-D array
-    for row in board_array:
-        print(row)
     
     # convert the 2D array to a string
     string = ""
@@ -69,12 +84,8 @@ def upload_board(board):
             string += str(value) + ","
     string = string[:-1] + "\n"
 
-    print(string)
-
     # send the string to the Arduino via serial communication
-    ser = serial.Serial('COM3', 9600) # replace 'COM3' with the serial port of your Arduino
-    ser.write(string.encode())
-    ser.close()
+    display(string)
 
 """ Display the board """
 def display_board(board):
@@ -138,6 +149,23 @@ def get_move(board, input_type, versus_type):
                 return v_move
             else:
                 print("Disallowed move. Try again. Your move was: ", v_move)  
+    else:
+        while(True):
+            # Get user input for the next move in UCI format
+            k_move = input("Enter your move (in UCI format): ")
+
+            k_move = handle_promotion(board, k_move)
+            if(chess.Move.from_uci(k_move) in legal_moves):
+                print("Allowed move. Your move was: ", k_move)
+
+                # Parse the user input to obtain the corresponding move object
+                k_move = chess.Move.from_uci(k_move)
+
+                return k_move
+            else:
+                print("Disallowed move. Try again. Your move was: ", k_move)
+
+
 
 # Define a function to update the elapsed time for a player
 def update_time(player, elapsed_time, white_time, black_time):
@@ -151,10 +179,8 @@ def update_time(player, elapsed_time, white_time, black_time):
 """ Initialize the board from settings and begin the game """
 def initialize_game():
     board = chess.Board()
-    # you should import settings from the website
-    #settings = website.settings()
     input_type = "Voice"
-    versus_type = "Human"
+    versus_type = "CPU"
     return board, input_type, versus_type 
 
 """ Code for ending the match """
@@ -163,7 +189,7 @@ def finish_game(board):
     result = board.result()
 
     display_board(board)
-    #upload_board(board)
+    upload_board(board)
 
     # Return a string based on the result
     if(result == "1-0"):
@@ -176,26 +202,24 @@ def finish_game(board):
         return "Error: Unknown match result."
 
 if __name__ == "__main__":
-    while(True):
-        #await
-        print('hi')
-        break
 
+    # Initialize the game
     board, input_type, versus_type = initialize_game()
+
     # Set the initial time for both players
     white_time = 15 * 60  # 5 minutes
     black_time = 15 * 60  # 5 minutes
+
     # Set the time increment for both players
     time_increment = 10  # 5 seconds
 
-    
-
+    # While the game is ongoing
     while not board.is_game_over():
         # Display the board
         display_board(board)
 
         # Upload the board to embedded/web connections
-        #upload_board(board)
+        upload_board(board)
 
         # Determine the current player
         current_player = board.turn
