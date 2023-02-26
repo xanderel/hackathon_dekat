@@ -113,29 +113,30 @@ def handle_promotion(board, move):
 
 """ Get the move from the player """
 def get_move(board, input_type, versus_type):
-    # if board.turn == chess.BLACK:
-    #     # It is black's turn, so get a move suggestion from Stockfish
-    #     move = get_stockfish_move(board)
-    #     return move
+    if(versus_type == "CPU"):
+        if board.turn == chess.BLACK:
+            # It is black's turn, so get a move suggestion from Stockfish
+            move = get_stockfish_move(board)
+            return move
+    else:
+        # Get all legal moves on the board
+        legal_moves = board.legal_moves
 
-    # Get all legal moves on the board
-    legal_moves = board.legal_moves
-
-    if(input_type == "Voice"):
-        #voice_condition = 0 # track whether it failed or was successful (or break out of loop)
-        while(True):
-            v_move = record()
-            if(v_move.__contains__(" ")):
-                v_move = v_move.replace(" ", "")
-            v_move = v_move.strip()
-            v_move = v_move.lower()
-            v_move = handle_promotion(board, v_move)
-            if(chess.Move.from_uci(v_move) in legal_moves):
-                print("Allowed move. Your move was: ", v_move)
-                v_move = chess.Move.from_uci(v_move)
-                return v_move
-            else:
-                print("Disallowed move. Try again. Your move was: ", v_move)  
+        if(input_type == "Voice"):
+            #voice_condition = 0 # track whether it failed or was successful (or break out of loop)
+            while(True):
+                v_move = record()
+                if(v_move.__contains__(" ")):
+                    v_move = v_move.replace(" ", "")
+                v_move = v_move.strip()
+                v_move = v_move.lower()
+                v_move = handle_promotion(board, v_move)
+                if(chess.Move.from_uci(v_move) in legal_moves):
+                    print("Allowed move. Your move was: ", v_move)
+                    v_move = chess.Move.from_uci(v_move)
+                    return v_move
+                else:
+                    print("Disallowed move. Try again. Your move was: ", v_move)  
 
 # Define a function to update the elapsed time for a player
 def update_time(player, elapsed_time, white_time, black_time):
